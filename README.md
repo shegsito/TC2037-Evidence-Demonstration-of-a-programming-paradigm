@@ -1,213 +1,228 @@
-# Way Too Long Words - Evidence of a Programming Parafigm
+# TC2037 — Evidence of a Programming Paradigm
 
-## Functional Paradigm - Racket 
+Evidence 3 
 
-### 1. Description
+Paradigm chosen: Functional
 
-Source: Codeforces 71A - Way Too Long Words
+Language: Racket 
 
-Sometimes some words like "localization" or "internationalization" are so long that writing them many times in one text is quite tiresome.
+Student: Germán Uriel Xochihua Moncada A01614712
 
-Let's consider a word too long, if its length is strictly more than 10 characters. All too long words should be replaced with a special abbreviation.
+Implementation of Computational Methods
 
-This abbreviation is made like this: we write down the first and the last letter of a word and between them we write the number of letters between the first and the last letters. That number is in decimal system and doesn't contain any leading zeroes.
+---
 
-Thus, "localization" will be spelt as "l10n", and "internationalization» will be spelt as "i18n".
+## 1. Description
 
-You are suggested to automatize the process of changing the words with abbreviations. At that all too long words should be replaced by the abbreviation and the words that are not too long should not undergo any changes.
+**Source:** [Codeforces 580A — Kefa and First Steps](https://codeforces.com/problemset/problem/580/A)
 
+Kefa tracks his daily earnings over `n` days. He wants to know the length of the longest **non-decreasing subsegment** — a continuous fragment where each value is greater than or equal to the previous one.
 
- All too-long words must be replaced with and abbreviation built in the following way:
+**Example:**
 
-``` 
-firstletter + countofmiddleletters + lastletter
-```
-
-Words with 10 or fewer characters remain unchanged.
-
-Example :
-
-| input | output |
-|-------|--------|
-| word  | word   |
-| internationalization | i18n |
-| localization | l10n | 
-| pneumonoultramicroscopicsilicovolcanoconiosis | p43s |
+| Input | Output | Explanation |
+|---|---|---|
+| `2 2 1 3 4 1` | `3` | Subsegment `1 3 4` has length 3 |
+| `2 2 9` | `3` | The entire array is non-decreasing |
 
 **Constraints:**
+- `1 ≤ n ≤ 10^5`
+- `1 ≤ ai ≤ 10^9`
 
-* 1 ≤ n ≤ 100 (number of words)
+### Real World Context
 
-* 1 ≤ |word| ≤ 100 (length of each word)
+This problem models a pattern that appears in several real applications:
 
-* All words consist of lowercase Latin letters
+- **Stock market analysis:** determine what's the longest continuous frowth streak in daily prices, which is a key signal in trend-following strategies.
 
-#### Real World Context
-This program is useful because it had been used in different applications, such as.
+- **Performance monitoring:** detecting que longest uninterrupted improvment period in system metrics.
 
-* Display truncation in UIs: shortening strings that have to fit inyo limited spaces. 
+- **Data quality checks:** finding the longest ordered run in a sequence to validate is a sensor is behaving correctly.
 
-* Text preprocessiong pipelines: in NLP pipelines, normalizing tokens is a fundamental step.
-
-* i18n/i10n tooling: abbreviations used in internationalization are literally used in software development.
-
-### Functional Paradigm
-
-Lambda calculus is a minimal framework for studying computation through **functions** and their evaluation. Many modern programming languages follows this functional paradigm.
-
-For this problem I chose the **functional paradigm** , this is ideal for the functional paradigm and what was it designed for. Given a list o words, produce a new list where each word is endependently converted according to a rule. No elemnt depends on any other.
-
-* Each word maps to exactly one output (a pure function with no side effects)
-
-* The transformation of one word is competely independent from all others
-
-* The solution reads as: "apply this rule to every element"
-
-* No mutable variables, loops or counters.
-
-This functional solution expresses what to do instead on iterating. This is the core difference between paradigms.
+---
 
 ## 2. Model
 
-![Diagram](/img/71Adiagram.drawio.png)
-* Figure 1. Modeled solution as a linear pipeline.
+The functional paradigm is done in **lambda calculus**, a formal system made by Alonzo Church (1936) for expressing computation through function application and substitution. Languages like Haskell, Lisp, Javascript and Racket are descendants of this model: every computation is a pure function that takes inputs and returns outputs with no observable side effects (Felleisen et al., 2018).
 
-#### How is the functional paradigm used?
+This problem is a particularly strong fit for the functional paradigm. The solution requires traversing a list while tracking three pieces of state: the previous element, the current segment length, and the best segment found so far. In the functional paradigm, this state is captured in an **immutable accumulator** a single value that is passed from one step to the next through `foldl`, never mutated.
 
-The characteristics of a functional paradigm are present in this problem.
+This is the core argument for functional programming here: instead of updating scattered mutable variables inside a loop, the state is captured in a single immutable accumulator that is explicitly passed from step to step. This is what makes `foldl` powerful — the traversal becomes a sequence of pure function calls, making the logic easier to follow, test, and verify.
 
-* Pure function: ```abbreviate ``` that has always the same output without side effects.
+The key properties that make this problem ideal for functional programming:
 
-* High-order function: map takes  ```abbreviate``` as an argument
+- The transversal is a **pure fold**: each step is a function of ONLY the current element and the accumulated state.
 
-* First-class function: ```abbreviate``` is passed directly to map as a value
+- The accumulator is **inmutable**: each call to `step` returns a new value insted of modifying thr old one.
 
-* No mutation: No variables reassigned
+- The solution is expressed as fold step initial-accumulator list. Just one line captures the entire
 
-* Lambda: used directly inside map
+- NO mutable variables, loops or counters.
 
-#### Abstract Representation
+### Pipeline Diagram
 
-For the input '("word" "internationzalization");
+![figure1](/img/Pipelinediagram.jpg.jpeg)
 
-![Abstract Representation](img/71A_Abstractrepresentation.drawio.png)
+*Figure 1. foldl applies step at each position threading the accumulator through the list*
 
-Figure 2. Word representation in the program
+### How Is the Functional Paradigm Used?
+
+* **Pure function:** `step` same accumulator + element always produce the same result, no side effects
+
+* **Higher-order function:** `foldl` takes `step` as a first-class argument
+
+* **First-class function:** `step` is passed directly to `foldl` as a value
+
+* **Immutable accumulator:** `(list prev curr best)` i never mutated, each call returns a new list.
+
+* **No mutation:** No variables are reassigned at any point.
+
+### Abstract Representation
+
+```
+Initial accumulator: (list 2 1 1)   ; prev=2, curr=1, best=1
+
+step 2 '(2 1 1)  →  '(2 2 2)       ; 2 >= 2, curr=2, best=2
+step 1 '(2 2 2)  →  '(1 1 2)       ; 1 < 2,  reset, best=2
+step 3 '(1 1 2)  →  '(3 2 2)       ; 3 >= 1, curr=2, best=2
+step 4 '(3 2 2)  →  '(4 3 3)       ; 4 >= 3, curr=3, best=3
+step 1 '(4 3 3)  →  '(1 1 3)       ; 1 < 4,  reset, best=3
+
+Result: (third '(1 1 3)) → 3
+```
+
+*Figure 2. The accumulator evolves at each step, it does not mutate it is always replaced*
+
+---
 
 ## 3. Implementation
 
-``` racket
-#lang racket
+### Racket
 
-(define (abbreviate word)
+```racket
 
-  (if (> (string-length word) 10)
-      (string-append
-       (string (string-ref word 0))                          ;;first letter
-       (number->string (- (string-length word) 2))           ;; middle count
-       (string (string-ref word (- (string-length word) 1))) ;; last letter
-       )
-      word))
-(define (solve words)
-  (map abbreviate words))
+;; The accumulator is a list: (list prev curr best)
+;; prev - previous element
+;; curr - length of current non-decreasing segment
+;; best - longest segment found so far
 
-``` 
 
-This is a natural functional solution because of this aspects:
+;; step: Number (List Number Number Number) -> (List Number Number Number)
+;; Pure function: fold passes (element accumulator), returns updated accum
 
-* ```map``` is a high order function that recieves another function as the argument
 
-* ```abbreviate``` is a pure function, it has not state, side effects and it is deterministic
+(define (step x acc)
+  (let ([prev (first acc)]
+        [curr (second acc)]
+        [best (third acc)])
+    (if (<= prev x)
+        (list x (+ curr 1) (max best (+ curr 1))) ; segment continues
+        (list x 1 best))))
 
-* The list is never mutated, a new list is returned
+;; solve : (Listof Number) -> Number
+;; Returns the length of the longest non-decreasing subsegment
 
-* The solution expresses what to do
+(define (solve lst)
+  (if (null? lst)
+      0
+      (third
+       (foldl step
+              (list (first lst) 1 1) ;; initial accum
+              (rest lst))))) ; fold over remaining elements
+```
+This is a natural functional solution as we use `fold`as a **high-order function** that recives `step` as a first-class argument. The accumulator is **never mutated**, the `step` calls returns a new list. Comparying it into a imperative solution, there are no modified shared variables.
 
-## 4. Test
+---
 
-```  racket
-;; TESTS ---------------------------------------------
+## 4 Test.
 
-;; general case
-(solve '("word" "internationalization" "localization" "pneumonoultramicroscopicsilicovolcanoconiosis"))
-(solve '("hi" "cat" "comprehensive" "antidisestablishmentarianism" "ok" "implementation"))
+Tests call `solve` directyl with different inputs. Run the file and it'll print the output of each test case.
 
-;; edge case case
-(solve '("" "a" "no" "x" "yes" "it" ""))
-
-;; superlarge words case
-(solve '("supercalifragilisticexpialidocious" "honorificabilitudinitatibus" "floccinauncinihilipilification" "pseudopseudohypoparathyroidism"))
-
-;; short words case
-(solve '("test" "test" "case" "code" "data" "word" "test"))
+```racket
+(solve '(2 2 1 3 4 1))       ; expected: 3
+(solve '(2 2 9))             ; expected: 3
+(solve '(1))                 ; expected: 1
+(solve '(1 2 3 4 5))         ; expected: 5
+(solve '(5 4 3 2 1))         ; expected: 1
+(solve '(1 1 1 1))           ; expected: 4
+(solve '(3 1 2 1 2 3))       ; expected: 3
+(solve '(1 3 2 4 3 5))       ; expected: 2
+(solve '())                  ; expected: 0
 ```
 
-For the tests I implemented different cases to get to know how does the program would react in different ways approaches. The program passed all the tests successfully. (All the tests are implemented in the base code by just running it.)
+| Test | Input | Expected | Output | Result |
+|---|---|---|---|---|
+| Example 1 from problem | `'(2 2 1 3 4 1)` | `3` | `3` |  Pass |
+| Example 2 from problem | `'(2 2 9)` | `3` | `3` |  Pass |
+| Single element | `'(1)` | `1` | `1` |  Pass |
+| Fully non-decreasing | `'(1 2 3 4 5)` | `5` | `5` |  Pass |
+| Fully decreasing | `'(5 4 3 2 1)` | `1` | `1` |  Pass |
+| All equal | `'(1 1 1 1)` | `4` | `4` |  Pass |
+| Multiple segments | `'(3 1 2 1 2 3)` | `3` | `3` |  Pass |
+| Alternating | `'(1 3 2 4 3 5)` | `2` | `2` |  Pass |
+| Empty list | `'()` | `0` | `0` |  Pass |
 
-| Test | Output | Result |
-|------|--------|--------|
-|general case | '("word" "i18n" "l10n" "p43s") | Pass ✔ |
-|edge case | '("hi" "cat" "c11e" "a26m" "ok" "i12n") | Pass ✔ |
-|superlarge case words | '("s32s" "h25s" "f28n" "p28m") | Pass ✔ |
-|short words case | '("test" "test" "case" "code" "data" "word" "test") | Pass ✔ |
+
+All 9 test succesfully passed 
+
+---
 
 ## 5. Analysis
 
 ### Time Complexity
 
-As this program uses different language-native functions an the programmed one, the complexity might be affected by them.
-
-Let n = number of words, m = lenght of a word (average)
+**Let `n` = number of elements in the list.**
 
 | Operation | Cost |
-|-----------|------|
-|string-length | O(1) |
-|string-ref | O(1) |
-|string-append | O(m) |
-|map over n words | O(n) |
-|**Total** | O(n*m) |
+|---|---|
+| `foldl` over `n` elements | O(n) — one pass |
+| `step` per element | O(1) — list access, comparison, max |
+| `first`, `second`, `third` | O(1) — fixed-position list access |
+| **Total** | **O(n)** |
 
-Given the constraints in this problem (n ≤ 100, m ≤ 100), the worst case is 10,000 operations.
+The overall complexity is **O(n)** — a single linear pass over the list with O(1) work per element.
 
-This results into an **O(n*m)** complexity.
+### Space Complexity
+
+| | Cost |
+|---|---|
+| Accumulator per step | O(1) fixed-size list of 3 values |
+| Call stack (`foldl` is iterative) | O(1) |
+| **Total** | **O(1)** |
+
+`foldl` in Racket is iterative, it does not build a call stack proportional to the list length. This means the solution uses constant auxiliary space, which is very efficient and optimal.
 
 ### Other Paradigms & Tradeoffs
 
-**Imperative - Python**
-An imperative solution uses an explicit loop and mutable list to accumulate the results
+Prolog is a logic programming language covered in this course. Instead of defining how to compute a result step by stepm you declare rules with relationships that the prolog's engine should resolve them through unification and backtracking (Clocksin & Mellish, 2003).
 
-``` python
-words = ["word", "internationzalization", "localization"]
-result = []
+///////////////////////////////////
+INSERT THE PROLOG CODE AND QUERY
+///////////////////////////////////
 
-for w in words: 
-    if len(w) > 10:
-        result.append(w[0] + str(len(w) - 2) + w[-1]) #mutable state
-    else: 
-        result.append(w)
-```
+#### Paradigm Comparison
 
-Returning an altered list and with mutable states means that there are characteristics of the imperative paradigm.
+| | Functional (Racket) | Logic (Prolog) |
+|---|---|---|
+| **Core mechanism** | `foldl` with immutable accumulator | Recursive rules with pattern matching |
+| **Mutation** | None | None |
+| **Time complexity** | O(n) | O(n) |
+| **Space complexity** | O(1) — `foldl` is iterative | O(n) — recursive call stack |
 
-### Paradigm approach comparison
+Both paradigms produce indentical results with the same time complexity. The functional version has a space advantage because of fold iterative function in Racket, while the Prolog solution builds a call stack of depth `n`. More importantly, the functional version expresses the algorithm more directly.
 
-|  | Functional - Racket | Imperative - Python |
-|--|---------------------|---------------------|
-|State mutation | No | Mutable list and loop index |
-|Iteration | Handled by map | Manual for loop |
-|Time Complexity | O(n*m) | O(n*m) |
-|Space Complexity  | O(n*m)| O(n*m) |
-|Style | Declarative expressing what | Imperative expressing how |
-
-Both solutions have identical asyptotic complexity. The functional version is easier to parallelize . The imperative version may be more familiar to devs without a functional background.
-
-Another approach to this problem in another paradigm can be a **Logic** coded Prolog solution.
+---
 
 ## Bibliography
-GeeksforGeeks. (2025, 15 noviembre). Functional Programming Paradigm. GeeksforGeeks. https://www.geeksforgeeks.org/blogs/functional-programming-paradigm/
 
-Aguirre, B. (2025). Lambda Calculus Functional Paradigm. https://docs.google.com/document/d/1w8DCXQ4cQPdcDPQOVN3Hn65X000V0oixgOatseDyvUE/edit?usp=sharing
+Church, A. (1936). An unsolvable problem of elementary number theory. *American Journal of Mathematics, 58*(2), 345–363. https://doi.org/10.2307/2371045
 
-Gorelik, A. (2018, 13 abril). How the map function implemeted in racket. Stack Overflow. https://stackoverflow.com/questions/49820029/how-the-map-function-implemeted-in-racket
+Clocksin, W. F., & Mellish, C. S. (2003). *Programming in Prolog* (5th ed.). Springer. https://doi.org/10.1007/978-3-642-55481-0
 
-Hudak, P. (1989). Conception, evolution, and application of functional programming languages. ACM Computing Surveys, 21(3), 359–411. https://doi.org/10.1145/72551.72554
+Felleisen, M., Findler, R. B., Flatt, M., & Krishnamurthi, S. (2018). *How to Design Programs* (2nd ed.). MIT Press. https://htdp.org
+
+Hudak, P. (1989). Conception, evolution, and application of functional programming languages. *ACM Computing Surveys, 21*(3), 359–411. https://doi.org/10.1145/72551.72554
+
+GeeksforGeeks. (2025, November 15). *Functional Programming Paradigm*. https://www.geeksforgeeks.org/blogs/functional-programming-paradigm/
+
+Aguirre, B. (2025). *Lambda Calculus Functional Paradigm*. https://docs.google.com/document/d/1w8DCXQ4cQPdcDPQOVN3Hn65X000V0oixgOatseDyvUE/edit?usp=sharing
